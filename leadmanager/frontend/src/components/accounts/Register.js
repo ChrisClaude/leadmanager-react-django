@@ -1,0 +1,111 @@
+import React, { Component } from 'react';
+import { Redirect, Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import { register } from '../../actions/auth';
+import { createMessage } from '../../actions/messages';
+
+class Register extends Component {
+  state = {
+    username: '',
+    email: '',
+    password: '',
+    password2: ''
+  };
+
+  static propTypes = {
+    register: PropTypes.func.isRequired,
+    isAuthenticated: PropTypes.bool
+  };
+
+  onSubmit = e => {
+    e.preventDefault();
+    const { username, email, password, password2 } = this.state;
+    if (password != password2) {
+      this.props.createMessage({ passwordsNotMatch: 'Passwords do not match' });
+    } else {
+      const newUser = { username, password, email };
+      this.props.register(newUser);
+    }
+  };
+
+  onChange = e => this.setState({ [e.target.name]: e.target.value });
+
+  render() {
+    if (this.props.isAuthenticated) {
+      return <Redirect to='/' />;
+    }
+    const { username, email, password, password2 } = this.state;
+    return (
+      <div className='col-md6 m-auto' style={{width: "450px"}}>
+        <div className='card card-body mt-5'>
+          <h2 className='text-center'>Register</h2>
+          <form onSubmit={this.onSubmit}>
+            <div className='from-group'>
+              <label htmlFor='username'>Username</label>
+              <input
+                type='text'
+                className='form-control'
+                name='username'
+                id='username'
+                onChange={this.onChange}
+                value={username}
+              />
+            </div>
+            <div className='from-group'>
+              <label htmlFor='email'>Email</label>
+              <input
+                type='email'
+                className='form-control'
+                name='email'
+                id='email'
+                onChange={this.onChange}
+                value={email}
+              />
+            </div>
+            <div className='from-group'>
+              <label htmlFor='password'>Password</label>
+              <input
+                type='password'
+                className='form-control'
+                name='password'
+                id='password'
+                onChange={this.onChange}
+                value={password}
+              />
+            </div>
+            <div className='from-group'>
+              <label htmlFor='password2'>Confirm Password</label>
+              <input
+                type='password'
+                className='form-control'
+                name='password2'
+                id='password2'
+                onChange={this.onChange}
+                value={password2}
+              />
+            </div>
+
+            <div className='form-group'>
+              <button type='submit' className='btn btn-primary mt-2'>
+                Register
+              </button>
+            </div>
+            <p>
+              Already have an account? <Link to='/login'>Login</Link>
+            </p>
+          </form>
+        </div>
+      </div>
+    );
+  }
+}
+
+const mapStateToProps = state => ({
+  isAuthenticated: state.auth.isAuthenticated
+});
+
+export default connect(
+  mapStateToProps,
+  { register, createMessage }
+)(Register);
